@@ -4,16 +4,38 @@ function writeFile(content, file, encoding){
     out.close();
 }
 
+function ifdef(input, symbol){
+    var block, match, eMatch;
+    var reBlock = /^\s*\/\/\ #ifdef [\s\S]+?\/\/ #endif$/gm, reElse = /^\s*\/\/ #else$/m, reMatch = new RegExp("^\\s*\\/\\/\\ #ifdef .*?\\b" + symbol + "\\b.*?$", "mg")
+    var ifPart, elsePart;
+    while ((match = reBlock.exec(input))) {
+        ifPart = elsePart = "";
+        block = match[0];
+        if ((eMatch = reElse.exec(block))) {
+            ifPart = block.substring(0, eMatch.index);
+            elsePart = block.substring(eMatch.index + eMatch[0].length);
+        }
+        else {
+            ifPart = block;
+        }
+        block = (reMatch.test(block) ? ifPart : elsePart).replace(/^\s*\/\/ #.*?$/mg, "");
+        input = input.substring(0, match.index - 1) + block + input.substring(match.index + match[0].length + 1);
+    }
+    return input;
+}
+
 /**
  * The applications 'main'
  */
 (function(a){
     var inputFile, outputFileBase;
-    var input, output;
+    var input, output, debug;
     var options = {
         jslint: true,
         jscontract: true,
-        jsbeautify: true
+        jsbeautify: true,
+    
+    
     };
     
     if (!a[0]) {
@@ -70,6 +92,9 @@ function writeFile(content, file, encoding){
         output = Contract.instrument(output);
     }
     
+    
+    debug = ifdef(output, "debug");
+    
     // js-beautify
     if (options.jsbeautify) {
         load('tools/js-beautify/beautify.js');
@@ -78,7 +103,15 @@ function writeFile(content, file, encoding){
             indent_char: " ",
             space_after_anon_function: true
         });
+        
+        debug = js_beautify(output, {
+            indent_size: 4,
+            indent_char: " ",
+            space_after_anon_function: true
+        });
     }
+    
+    writeFile(debug, outputFileBase + ".debug.js");
     writeFile(output, outputFileBase + ".out.js");
     quit();
 })(arguments);
