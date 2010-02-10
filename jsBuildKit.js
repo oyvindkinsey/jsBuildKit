@@ -1,4 +1,5 @@
 importPackage(com.yahoo.platform.yui.compressor);
+importPackage(org.mozilla.javascript);
 
 function writeFile(content, file, encoding){
     var out = new java.io.BufferedWriter(new java.io.FileWriter(file));
@@ -6,9 +7,6 @@ function writeFile(content, file, encoding){
     out.close();
 }
 
-var reader
-var er
-var yui = new com.yahoo.platform.yui.compressor.JavaScriptCompressor(reader,er);
 function ifdef(input, symbol){
     var block, match, eMatch;
     var reBlock = /^\s*\/\/\ #ifdef [\s\S]+?\/\/ #endif$/gm, reElse = /^\s*\/\/ #else$/m, reMatch = new RegExp("^\\s*\\/\\/\\ #ifdef .*?\\b" + symbol + "\\b.*?$", "mg")
@@ -118,5 +116,10 @@ function ifdef(input, symbol){
     
     writeFile(debug, outputFileBase + ".debug.js");
     writeFile(output, outputFileBase + ".out.js");
+    
+    var reader = new java.io.InputStreamReader(new java.io.FileInputStream(outputFileBase + ".out.js"), "UTF-8");
+    var er = new ErrorReporter();
+    var yui = new com.yahoo.platform.yui.compressor.JavaScriptCompressor(reader, er);
+    
     quit();
 })(arguments);
