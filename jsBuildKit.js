@@ -1,9 +1,14 @@
+importPackage(com.yahoo.platform.yui.compressor);
+
 function writeFile(content, file, encoding){
     var out = new java.io.BufferedWriter(new java.io.FileWriter(file));
     out.write(content);
     out.close();
 }
 
+var reader
+var er
+var yui = new com.yahoo.platform.yui.compressor.JavaScriptCompressor(reader,er);
 function ifdef(input, symbol){
     var block, match, eMatch;
     var reBlock = /^\s*\/\/\ #ifdef [\s\S]+?\/\/ #endif$/gm, reElse = /^\s*\/\/ #else$/m, reMatch = new RegExp("^\\s*\\/\\/\\ #ifdef .*?\\b" + symbol + "\\b.*?$", "mg")
@@ -31,9 +36,9 @@ function ifdef(input, symbol){
     var inputFile, outputFileBase;
     var input, output, debug;
     var options = {
-        jslint: true,
-        jscontract: true,
-        jsbeautify: true,
+        jslint: false,
+        jscontract: false,
+        jsbeautify: false,
     
     
     };
